@@ -5,6 +5,14 @@ using namespace std;
 
 float alpha, beta, mu, vepsilon;
 
+float H = 1.27f;
+float L = 2.54f;
+float h = 0.04f;
+
+//Points des plans
+vector<vec3> planesA = { {0,0,0}, {-L / 2, 0, -H / 2},{-L / 2, 0, -H / 2}, {H / 2, 0, L / 2}, {H / 2, 0, L / 2}, };
+vector<vec3> normals = { {0,1,0}, {0,0,1}, {1,0,0}, {-1,0,0},{0,0,-1} };
+
 void simulate(std::vector<particle_structure>& particles, float dt)
 {
 	vec3 const g = { 0,-9.81f,0 };
@@ -19,13 +27,7 @@ void simulate(std::vector<particle_structure>& particles, float dt)
 		particle.p = particle.p + dt * particle.v;
 	}
 
-	// To do :
-	//  Handle collision ...
-
-	//Points des plans
-	vector<vec3> planesA = { {0,0,0}  };
-	vector<vec3> normals = { {0,1,0}  };
-
+	//Collision
 	for (size_t k = 0; k < N; ++k)
 	{
 		particle_structure& particle = particles[k];

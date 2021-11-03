@@ -4,7 +4,7 @@
 
 // Custom scene of this code
 #include "scene.hpp"
-
+#include "utils.h"
 
 // *************************** //
 // Global Variables
@@ -26,8 +26,7 @@ scene_structure scene;
 // Start of the program
 // *************************** //
 
-GLFWwindow* standard_window_initialization(int width, int height); 
-bool intersection_plan(vec3& intersect, const vec3& droite_position, const vec3& droite_direction, const vec3& normal, const vec3& sphere_position);
+GLFWwindow* standard_window_initialization(int width, int height);
 
 vec2 glfw_cursor_coordinates_window(GLFWwindow* window)
 {
@@ -107,26 +106,18 @@ void window_size_callback(GLFWwindow*, int width, int height)
 {
 	inputs.window = { width, height };
 }
-void droite_souris(const vec2& cursor, vec3& pos, vec3& direction)
-{
-	pos = scene.environment.camera.position();
 
-	vec4 dir_screen = { cursor.x,cursor.y,-1.0f,1.0f };
-	mat4 Proj_inv = scene.environment.projection.matrix_inverse();
-	mat4 View_inv = scene.environment.camera.matrix_frame();
 
-	vec4 dir_eye = Proj_inv * dir_screen;
-	vec4 dir = View_inv * vec4(dir_eye.x, dir_eye.y, -1.0f, 0.0f);
-
-	direction = normalize(vec3(dir[0], dir[1], dir[2]));
-}
-
-// This function is called everytime the mouse is moved
+/// <summary>
+/// La souris est déplacée : gestion du déplacement de l'extrémité de la queue.
+/// </summary>
+/// <param name="window"></param>
+/// <param name="xpos"></param>
+/// <param name="ypos"></param>
 void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	inputs.mouse_position_update({ xpos, ypos });
 
-	
 
 	const bool mouse_click_left = glfw_mouse_pressed_left(window);
 	const bool key_shift = glfw_key_shift_pressed(window);
@@ -143,73 +134,25 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 
 		// Droite souris->sphère
 		vec3 pos, dir, intersct;
-		droite_souris(cursor, pos, dir);
+		droite_souris(scene, cursor, pos, dir);
 		switch (scene.cur_control)
 		{
 		case 1:
-			intersection_plan(intersct, pos, dir, n, scene.ctrl1);
-			scene.ctrl1 = intersct;
+			intersection_plan(intersct, pos, dir, n, scene.ctrl_pos);
+			scene.ctrl_pos = intersct;
 			scene.refresh_control_positions();
 			break;
-		case 2:
-			intersection_plan(intersct, pos, dir, n, scene.ctrl2);
-			scene.ctrl2 = intersct;
-			scene.refresh_control_positions();
-
 			break;
 		default:
 			break;
 		}
-		// translate the position
-		
-
-
 	}
 	else
 	{
 		// Default trackball mode - change this behavior as you wish
-	//camera_standard_behavior_rotation_spherical_coordinates(scene.environment.camera, inputs);
+		//camera_standard_behavior_rotation_spherical_coordinates(scene.environment.camera, inputs);
 		camera_standard_behavior_rotation_trackball(scene.environment.camera, inputs);
 	}
-}
-
-
-
-
-bool intersection_droite(vec3& intersect, const vec3& droite_position, const vec3& droite_direction, const vec3& center, float radius)
-{
-	const vec3 d = droite_position - center;
-	const float b = dot(droite_direction, d);
-	const float c = dot(d, d) - radius * radius;
-
-	const float delta = b * b - c;
-	if (delta >= 0)
-	{
-		const float t0 = -b - std::sqrt(delta);
-		const float t1 = -b + std::sqrt(delta);
-
-		const float t = t0 > 0 ? t0 : t1;
-
-		if (t > 0) {
-			intersect = droite_position + t * droite_direction;
-			//pick.normal = normalize(pick.intersection - center);
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool intersection_plan(vec3& intersect, const vec3& droite_position, const vec3& droite_direction, const vec3& normal, const vec3& sphere_position)
-{
-	const float t = -dot(droite_position - sphere_position, normal) / dot(droite_direction, normal);
-	if (t > 0)
-	{
-		intersect = droite_position + t * droite_direction;
-		return true;
-	}
-
-	return false;
 }
 
 // This function is called everytime a mouse button is clicked/released
@@ -230,12 +173,12 @@ void mouse_click_callback(GLFWwindow* window, int button, int action, int /*mods
 	{
 		// Droite souris->sphère
 		vec3 pos, dir;
-		droite_souris(cursor, pos, dir);
+		droite_souris(scene, cursor, pos, dir);
 
-		float distance_min = 0.0f;
+		float distance_min = 0.1f;
 
 		vec3 intersect;
-		if (intersection_droite(intersect, pos, dir, scene.ctrl1, scene.control_radius)) //control1
+		if (intersection_droite(intersect, pos, dir, scene.ctrl_pos, scene.control_radius)) //controle
 		{
 			const float distance = norm(intersect - pos);
 			if (scene.cur_control == -1 || distance < distance_min)
@@ -243,16 +186,7 @@ void mouse_click_callback(GLFWwindow* window, int button, int action, int /*mods
 				distance_min = distance;
 				scene.cur_control = 1;
 			}
-		}
-		else if (intersection_droite(intersect, pos, dir, scene.ctrl2, scene.control_radius)) //control2
-		{
-			const float distance = norm(intersect - pos);
-			if (scene.cur_control == -1 || distance < distance_min)
-			{
-				distance_min = distance;
-				scene.cur_control = 2;
-			}
-		}
+		} 
 		else
 			scene.cur_control = -1;
 

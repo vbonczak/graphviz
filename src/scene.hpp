@@ -38,25 +38,39 @@ struct scene_structure {
 
 	int cur_control;
 	
-	vec3 ctrl1, ctrl2;
+	vec3 ctrl_pos;
 	float control_radius;
-	mesh_drawable control_sphere1;
+	mesh_drawable control_sphere;
+
+	
 
 	float queue_radius;
-	mesh_drawable queue;
-	mesh_drawable control_sphere2;
+	bool queue_waiting;
+	mesh_drawable queue; 
 
+	GLint texture_bois;
+
+	mesh_drawable bord1;
+	mesh_drawable bord2;
+	mesh_drawable bord3;
+	mesh_drawable bord4;
 
 	// ****************************** //
 	// Elements and shapes of the scene
 	// ****************************** //
 	cgp::timer_event_periodic timer;
-	std::vector<particle_structure> particles;
+
+	/// <summary>
+	/// La première boule est la blanche.
+	/// </summary>
+	std::vector<particle_structure> boules;
+
 	// ****************************** //
 	// Functions
 	// ****************************** //
 
 	void initialize();  // Standard initialization to be called before the animation loop
+	void init_objects();
 	void display();     // The frame display to be called within the animation loop
 	void display_gui(); // The display of the GUI, also called within the animation loop
 
@@ -64,5 +78,8 @@ struct scene_structure {
 	//void simulation_step(float dt);
 	void sphere_display();
 	void refresh_control_positions();
+	void queue_init();
+	void queue_reinit();
+	void launch_ball();
 	//vector<GLuint> balls_textures;             // Storage of the texture ID used for each ball
 };

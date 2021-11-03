@@ -4,6 +4,11 @@
 
 extern float alpha, beta, mu, vepsilon;
 
+//Dimensions du plateau
+extern float H;
+extern float L;
+extern float h;
+
 struct particle_structure
 {
     cgp::vec3 p; // Position
