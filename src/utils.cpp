@@ -1,5 +1,8 @@
 #include "utils.h"
 
+//Fonctions issues de la bibliothèque VCL de Damien Rohmer https://github.com/drohmer/inf443-vcl
+//Adaptées pour les besoins du programme.
+
 void droite_souris(const scene_structure& scene, const vec2& cursor, vec3& pos, vec3& direction)
 {
 	pos = scene.environment.camera.position();
@@ -40,6 +43,15 @@ bool intersection_droite(vec3& intersect, const vec3& droite_position, const vec
 	return false;
 }
 
+/// <summary>
+/// Intersection d'une droite et d'un plan auquel appartient sphere_position.
+/// </summary>
+/// <param name="intersect"></param>
+/// <param name="droite_position"></param>
+/// <param name="droite_direction"></param>
+/// <param name="normal"></param>
+/// <param name="sphere_position"></param>
+/// <returns>True si une intersection existe.</returns>
 bool intersection_plan(vec3& intersect, const vec3& droite_position, const vec3& droite_direction, const vec3& normal, const vec3& sphere_position)
 {
 	const float t = -dot(droite_position - sphere_position, normal) / dot(droite_direction, normal);
@@ -50,4 +62,31 @@ bool intersection_plan(vec3& intersect, const vec3& droite_position, const vec3&
 	}
 
 	return false;
+}
+
+
+
+vec2 glfw_cursor_coordinates_window(GLFWwindow* window)
+{
+	// Window size
+	int w = 0, h = 0;
+	glfwGetWindowSize(window, &w, &h);
+
+	// Current cursor position
+	double xpos = 0, ypos = 0;
+	glfwGetCursorPos(window, &xpos, &ypos);
+
+	// Convert pixel coordinates to relative screen coordinates between [-1,1]
+	const float x = 2 * float(xpos) / float(w) - 1;
+	const float y = 1 - 2 * float(ypos) / float(h);
+
+	return { x,y };
+}
+bool glfw_mouse_pressed_left(GLFWwindow* window)
+{
+	return (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
+}
+bool glfw_key_shift_pressed(GLFWwindow* window)
+{
+	return (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) || glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT));
 }

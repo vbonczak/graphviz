@@ -19,39 +19,12 @@ cgp::inputs_interaction_parameters inputs;
 // The custom structure of the current scene defined in "scene.hpp"
 scene_structure scene;
 
-
-
-
 // *************************** //
 // Start of the program
 // *************************** //
 
 GLFWwindow* standard_window_initialization(int width, int height);
 
-vec2 glfw_cursor_coordinates_window(GLFWwindow* window)
-{
-	// Window size
-	int w = 0, h = 0;
-	glfwGetWindowSize(window, &w, &h);
-
-	// Current cursor position
-	double xpos = 0, ypos = 0;
-	glfwGetCursorPos(window, &xpos, &ypos);
-
-	// Convert pixel coordinates to relative screen coordinates between [-1,1]
-	const float x = 2 * float(xpos) / float(w) - 1;
-	const float y = 1 - 2 * float(ypos) / float(h);
-
-	return { x,y };
-}
-bool glfw_mouse_pressed_left(GLFWwindow* window)
-{
-	return (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
-}
-bool glfw_key_shift_pressed(GLFWwindow* window)
-{
-	return (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) || glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT));
-}
 int main(int, char* argv[])
 {
 	std::cout << "Run " << argv[0] << std::endl;
@@ -118,21 +91,20 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	inputs.mouse_position_update({ xpos, ypos });
 
-
 	const bool mouse_click_left = glfw_mouse_pressed_left(window);
-	const bool key_shift = glfw_key_shift_pressed(window);
-	if (mouse_click_left && key_shift && scene.cur_control != -1)
+	//const bool key_shift = glfw_key_shift_pressed(window);
+	if (mouse_click_left && scene.cur_control != -1)
 	{
 		//Dans le plan de la caméra
 
 		// Get vector orthogonal to camera orientation
 		const mat4 M = scene.environment.camera.matrix_frame();
-		const vec3 n = { M(0,2),M(1,2),M(2,2) };
+		const vec3 n = { 0,1,0 };//{ M(0,2),M(1,2),M(2,2) };
 
 		// Compute intersection between current ray and the plane orthogonal to the view direction and passing by the selected object
 		const vec2 cursor = glfw_cursor_coordinates_window(window);
 
-		// Droite souris->sphère
+		// Droite souris->tout droit
 		vec3 pos, dir, intersct;
 		droite_souris(scene, cursor, pos, dir);
 		switch (scene.cur_control)
@@ -165,11 +137,10 @@ void mouse_click_callback(GLFWwindow* window, int button, int action, int /*mods
 	// 
 	// Check that the mouse is clicked (drag and drop)
 	const bool mouse_click_left = glfw_mouse_pressed_left(window);
-	const bool key_shift = glfw_key_shift_pressed(window);
+	//const bool key_shift = glfw_key_shift_pressed(window);
 	const vec2 cursor = glfw_cursor_coordinates_window(window);
-
-	// Check if shift key is pressed
-	if (mouse_click_left && key_shift)
+	 
+	if (mouse_click_left)
 	{
 		// Droite souris->sphère
 		vec3 pos, dir;

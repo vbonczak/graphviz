@@ -12,3 +12,9 @@ void droite_souris(const scene_structure& scene, const vec2& cursor, vec3& pos, 
 bool intersection_droite(vec3& intersect, const vec3& droite_position, const vec3& droite_direction, const vec3& center, float radius);
 
 bool intersection_plan(vec3& intersect, const vec3& droite_position, const vec3& droite_direction, const vec3& normal, const vec3& sphere_position);
+
+vec2 glfw_cursor_coordinates_window(GLFWwindow* window);
+
+bool glfw_mouse_pressed_left(GLFWwindow* window);
+
+bool glfw_key_shift_pressed(GLFWwindow* window);

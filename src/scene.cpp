@@ -55,7 +55,7 @@ void scene_structure::init_objects()
 	plane.shading.color = { 0.0f, 0x6d / 255.f, 0.0f };
 	plane.shading.phong.specular = .0f;
 	plane.transform.translation = { -H / 2,0,-L / 2 };
-	control_radius = 0.06;
+	control_radius = 0.06f;
 
 
 
@@ -159,8 +159,7 @@ void scene_structure::sphere_display()
 void scene_structure::refresh_control_positions()
 {
 	control_sphere.transform.translation = ctrl_pos;
-
-
+	queue_reinit();
 }
 
 void scene_structure::queue_init()
