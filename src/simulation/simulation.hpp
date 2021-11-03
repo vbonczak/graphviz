@@ -9,7 +9,7 @@ extern float H;
 extern float L;
 extern float h;
 
-struct particle_structure
+struct boule_structure
 {
     cgp::vec3 p; // Position
     cgp::vec3 v; // Speed
@@ -20,5 +20,5 @@ struct particle_structure
     GLint text; //texture
 };
 
-void simulate(std::vector<particle_structure>& particles, float dt);
+void simulate(std::vector<boule_structure>& boules, float dt);
 

@@ -121,7 +121,7 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 	}
 	else
 	{
-		// Default trackball mode - change this behavior as you wish
+		// Default trackball mode - change this behaviour as you wish
 		//camera_standard_behavior_rotation_spherical_coordinates(scene.environment.camera, inputs);
 		camera_standard_behavior_rotation_trackball(scene.environment.camera, inputs);
 	}

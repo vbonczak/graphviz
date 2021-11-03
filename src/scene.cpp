@@ -21,7 +21,7 @@ void scene_structure::initialize()
 
 
 	alpha = 0.98f;
-	beta = 0.05;
+	beta = 0.05f;
 	mu = 0.92f;
 	vepsilon = 0.30f;
 
@@ -67,11 +67,13 @@ void scene_structure::init_objects()
 
 	add_balls();
 
-	ctrl_pos = { 3,0,3 };
+	
 	queue_radius = 0.02f;
+	queue_length = 1.5f;
 	queue_init();
 	queue_waiting = true;
 
+	ctrl_pos = { 0,0,-L/4-queue_length };
 	control_sphere.transform.translation = ctrl_pos;
 
 	cur_control = -1;
@@ -116,19 +118,21 @@ void scene_structure::display()
 
 	// Display the result
 	sphere_display();
-
-	draw(queue, environment);
-	if (cur_control == 1)
+	if (~queue_waiting)
 	{
-		control_sphere.shading.color = { 0,0,1 };
-	}
-	else
-	{
-		control_sphere.shading.color = { 1,0,0 };
-	}
+		refresh_control_positions();
+		draw(queue, environment);
+		if (cur_control == 1)
+		{
+			control_sphere.shading.color = { 0,0,1 };
+		}
+		else
+		{
+			control_sphere.shading.color = { 1,0,0 };
+		}
 
-	draw(control_sphere, environment);
-
+		draw(control_sphere, environment);
+	}
 	if (gui.display_frame)
 		draw(global_frame, environment);
 
@@ -145,11 +149,11 @@ void scene_structure::sphere_display()
 	size_t const N = boules.size();
 	for (size_t k = 0; k < N; ++k)
 	{
-		particle_structure const& particle = boules[k];
+		boule_structure const& boule = boules[k];
 		//sphere.texture = particle.text;
-		sphere.transform.translation = particle.p;
-		sphere.transform.scaling = particle.r;
-		sphere.shading.color = particle.c;
+		sphere.transform.translation = boule.p;
+		sphere.transform.scaling = boule.r;
+		sphere.shading.color = boule.c;
 		draw(sphere, environment);
 	}
 }
@@ -164,6 +168,9 @@ void scene_structure::refresh_control_positions()
 
 void scene_structure::queue_init()
 {
+	vec3 white_pos = boules[0].p;
+	//std::cout << white_pos << "   " << ctrl_pos << endl;
+	ctrl_pos = white_pos + queue_length*((ctrl_pos-white_pos) / norm(ctrl_pos-white_pos));
 	queue.initialize(mesh_primitive_cylinder(queue_radius, ctrl_pos, boules[0].p), "queue");
 	queue.shading.color = { 0x63 / 255.f,0,0 };
 }
@@ -174,6 +181,12 @@ void scene_structure::queue_reinit()
 	queue_init();
 }
 
+/*void scene_structure::update_queue_pos()
+{
+	ctrl_pos = ctrl_pos/ norm(ctrl_pos);
+	ctrl_pos = queue_length * ctrl_pos;
+}*/
+
 void scene_structure::launch_ball()
 {
 	//Lancement de la boule, sa vitesse devient >0
@@ -183,48 +196,98 @@ void scene_structure::launch_ball()
 }
 
 buffer<vec3> const colors = { {1,1,1},//blanche
-	{0xFF / 255.,0xBF / 255.,0},
-{0x0C / 255.,0x35 / 255.,0xff / 255.},
+	/*{0xFF / 255.,0xBF / 255.,0},
+	{0x0C / 255.,0x35 / 255.,0xff / 255.},
 	{0xff / 255,0 ,0x0c / 255.},
 	{0x0C / 255.,0x0E / 255.,0xAD / 255.},
 
 	{0xFF / 255.,0x65 / 255.,0x0C / 255.},
 	{0x00 / 255.,0xCE / 255.,0x78 / 255.},
-	{0xB2 / 255.,0x08 / 255.,0x00 / 255.},
-	{0x00 / 255.,0x00 / 255.,0x00 / 255.},//8 NOIRE
-
-	 {0xFF / 255.,0xBF / 255.,0},
+	{0xB2 / 255.,0x08 / 255.,0x00 / 255.},*/
+	{1,0,0},
+	{1,0,0},
+	{1,0,0},
+	{1,0,0},
+	{1,0,0},
+	{1,0,0},
+	{1,0,0},
+	//{0x00 / 255.,0x00 / 255.,0x00 / 255.},//8 NOIRE
+	{0,0,0}, //8 ball
+	{1,1,0},
+	{1,1,0},
+	{1,1,0},
+	{1,1,0},
+	{1,1,0},
+	{1,1,0},
+	{1,1,0}
+	/*{0xFF / 255.,0xBF / 255.,0},
 	{0x0C / 255.,0x35 / 255.,0xff / 255.},
 	{0xff / 255,0 ,0x0c / 255},
 	{0x0C / 255.,0x0E / 255.,0xAD / 255.},
 
 	{0xFF / 255.,0x65 / 255.,0x0C / 255.},
 	{0x00 / 255.,0xCE / 255.,0x78 / 255.},
-	{0xB2 / 255.,0x08 / 255.,0x00 / 255.},
+	{0xB2 / 255.,0x08 / 255.,0x00 / 255.},*/
 };
 
 void scene_structure::add_balls()
 {
 	// Emit particle with random velocity
-	//  Assume first that all particles have the same radius and mass
-	for (size_t i = 0; i < colors.size(); i++)
+	// Assume first that all particles have the same radius and mass
+	/*for (size_t i = 0; i < colors.size(); i++)
 	{
 		//balls_textures.push_back(opengl_load_texture_image("assets/" + to_string(i % 7 + 1) + ".jpg"));
 		
-		float const theta = rand_interval(0, 2 * pi);
-		vec3 const v = vec3(5.0f * std::cos(theta), 50.0f, 5.0f * std::sin(theta));
+		//float const theta = rand_interval(0, 2 * pi);
+		//vec3 const v = vec3(5.0f * std::cos(theta), 50.0f, 5.0f * std::sin(theta));
 
 		particle_structure particle;
 		particle.p = { 0,1,0 };
 		particle.r = 0.03f;//6cm de diamètre
 		particle.c = colors[i];
 		//particle.text = balls_textures[i];
-		particle.v = v;
+		particle.v = { 0,0,0 };
 		particle.m = 200.0f; //200g
 
 		boules.push_back(particle);
-	}
+	}*/
 
+	float initial_height = 10;
+
+	boule_structure boule;
+	boule.r = 0.03f;//6cm de diamètre
+	boule.p = {	 0, boule.r+ initial_height, -L/4 };
+	boule.c = { 1,1,1 };
+	boule.v = { 0,-0.2,0 };
+	boule.m = 200.0f; //200g
+
+	boules.push_back(boule);
+
+	int yellows = 7, reds = 7;
+
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < i + 1; j++)
+		{
+			boule.p = {(2 * j - i) * boule.r, boule.r+ initial_height, L / 4 + sqrt(3) * boule.r * i };
+			if (i == 2 && j == 1)
+			{
+				boule.c = { 0,0,0 };
+				boules.push_back(boule);
+				continue;
+			}
+			if (yellows == 0 || (reds > 0 && std::rand() % 2 == 0))
+			{
+				boule.c = { 1,0,0 };
+				boules.push_back(boule);
+				reds--;
+				continue;
+			}
+			boule.c = { 1,1,0 };
+			boules.push_back(boule);
+			yellows--;
+		}
+	}
 }
 
 void scene_structure::display_gui()

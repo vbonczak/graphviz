@@ -10,39 +10,39 @@ float L = 2.54f;
 float h = 0.04f;
 
 //Points des plans
-vector<vec3> planesA = { {0,0,0}, {-L / 2, 0, -H / 2},{-L / 2, 0, -H / 2}, {H / 2, 0, L / 2}, {H / 2, 0, L / 2}, };
+vector<vec3> planesA = { {0,0,0}, {-H / 2, 0, -L / 2},{-H / 2, 0, -L / 2}, {H / 2, 0, L / 2}, {H / 2, 0, L / 2}, };
 vector<vec3> normals = { {0,1,0}, {0,0,1}, {1,0,0}, {-1,0,0},{0,0,-1} };
 
-void simulate(std::vector<particle_structure>& particles, float dt)
+void simulate(std::vector<boule_structure>& boules, float dt)
 {
 	vec3 const g = { 0,-9.81f,0 };
-	size_t const N = particles.size();
+	size_t const N = boules.size();
 	for (size_t k = 0; k < N; ++k)
 	{
-		particle_structure& particle = particles[k];
+		boule_structure& boule = boules[k];
 
-		vec3 const f = particle.m * g;
+		vec3 const f = boule.m * g;
 
-		particle.v = (1 - 0.9f * dt) * particle.v + dt * f;
-		particle.p = particle.p + dt * particle.v;
+		boule.v = (1 - 0.9f * dt) * boule.v + dt * f;
+		boule.p = boule.p + dt * boule.v;
 	}
 
 	//Collision
 	for (size_t k = 0; k < N; ++k)
 	{
-		particle_structure& particle = particles[k];
+		boule_structure& boule = boules[k];
 		//Collision avec les faces du cube
 		for (size_t j = 0; j < planesA.size(); j++)
 		{
-			float d = dot(particle.p - planesA[j], normals[j]);
-			if (d < particle.r)
+			float d = dot(boule.p - planesA[j], normals[j]);
+			if (d < boule.r)
 			{
 				vec3 vpar, vperp;
-				vperp = dot(particle.v, normals[j]) * normals[j];
-				vpar = particle.v - vperp;
+				vperp = dot(boule.v, normals[j]) * normals[j];
+				vpar = boule.v - vperp;
 
-				particle.v = alpha * vpar - beta * vperp;
-				particle.p += (particle.r - d) * normals[j];
+				boule.v = alpha * vpar - beta * vperp;
+				boule.p += (boule.r - d) * normals[j];
 			}
 		}
 
@@ -51,30 +51,30 @@ void simulate(std::vector<particle_structure>& particles, float dt)
 		{
 			if (i != k)
 			{
-				particle_structure& particle2 = particles[i];
-				float dist = norm(particle.p - particle2.p);
-				if (dist <= particle2.r + particle.r)
+				boule_structure& boule2 = boules[i];
+				float dist = norm(boule.p - boule2.p);
+				if (dist <= boule2.r + boule.r)
 				{
 					//Ces deux sphères sont en collision
 					//Formule générale avec des masses différentes
-					vec3 u = (particle.p - particle2.p) / dist;
-					if (norm(particle.v) > vepsilon || norm(particle2.v) > vepsilon)
+					vec3 u = (boule.p - boule2.p) / dist;
+					if (norm(boule.v) > vepsilon || norm(boule2.v) > vepsilon)
 					{
-						float j = 2 * dot(particle2.v - particle.v, u) * (particle.m * particle2.m) / (particle.m + particle2.m);
+						float j = 2 * dot(boule2.v - boule.v, u) * (boule.m * boule2.m) / (boule.m + boule2.m);
 
-						particle.v = alpha * particle.v + u * beta * j / particle.m;
-						particle2.v = alpha * particle2.v - u * beta * j / particle2.m;
+						boule.v = alpha * boule.v + u * beta * j / boule.m;
+						boule2.v = alpha * boule2.v - u * beta * j / boule2.m;
 					}
 					else
 					{
-						particle.v = mu * particle.v;
-						particle2.v = mu * particle2.v;
+						boule.v = mu * boule.v;
+						boule2.v = mu * boule2.v;
 					}
 
 					//Position corrigée
-					float d = particle.r + particle2.r - dist;
-					particle.p += (d / 2) * u;
-					particle2.p -= (d / 2) * u;
+					float d = boule.r + boule2.r - dist;
+					boule.p += (d / 2) * u;
+					boule2.p -= (d / 2) * u;
 
 					//Formule avec m1=m2
 

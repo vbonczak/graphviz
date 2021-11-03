@@ -45,6 +45,7 @@ struct scene_structure {
 	
 
 	float queue_radius;
+	float queue_length;
 	bool queue_waiting;
 	mesh_drawable queue; 
 
@@ -63,7 +64,7 @@ struct scene_structure {
 	/// <summary>
 	/// La première boule est la blanche.
 	/// </summary>
-	std::vector<particle_structure> boules;
+	std::vector<boule_structure> boules;
 
 	// ****************************** //
 	// Functions
@@ -80,6 +81,7 @@ struct scene_structure {
 	void refresh_control_positions();
 	void queue_init();
 	void queue_reinit();
+	void update_queue_pos(); // Keeps the length of the cue constant
 	void launch_ball();
 	//vector<GLuint> balls_textures;             // Storage of the texture ID used for each ball
 };
