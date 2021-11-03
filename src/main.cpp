@@ -39,7 +39,8 @@ int main(int, char* argv[])
 	
 	// Standard Initialization with dimension in pixels
 	GLFWwindow* window = standard_window_initialization(1280, 1080); 
-	
+ 
+
 	// Custom scene initialization
 	std::cout << "Initialize data of the scene ..." << std::endl;
 	scene.initialize();                                              
@@ -88,7 +89,8 @@ void mouse_move_callback(GLFWwindow* /*window*/, double xpos, double ypos)
 	inputs.mouse_position_update( { xpos, ypos } );
 
 	// Default trackball mode - change this behavior as you wish
-	camera_standard_behavior_rotation_spherical_coordinates(scene.environment.camera, inputs);
+	//camera_standard_behavior_rotation_spherical_coordinates(scene.environment.camera, inputs);
+	camera_standard_behavior_rotation_trackball(scene.environment.camera, inputs);
 }
 
 // This function is called everytime a mouse button is clicked/released
