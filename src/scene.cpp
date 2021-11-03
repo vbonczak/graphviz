@@ -26,6 +26,22 @@ void scene_structure::initialize()
 	sphere.shading.phong.specular = 0.85f;
 	plane.shading.color = { 0.0f, 0x6d / 255.f, 0.0f };
 	plane.shading.phong.specular = .0f;
+	control_radius = 0.06;
+	//Contrôles
+	control_sphere1.initialize(mesh_primitive_sphere(control_radius), "ctrl1");
+	control_sphere2.initialize(mesh_primitive_sphere(control_radius), "ctrl2");
+	control_sphere1.shading.color = { 1,0,0 };
+	control_sphere2.shading.color = { 1,1,0 };
+
+	ctrl1 = { 3,0,3 };
+	ctrl2 = { 8,0,8 };
+	queue_radius = 0.04f;
+	queue.initialize(mesh_primitive_cylinder(queue_radius, ctrl1, ctrl2), "queue");
+
+	control_sphere1.transform.translation = ctrl1;
+	control_sphere2.transform.translation = ctrl2;
+
+	cur_control = -1;
 
 	timer.event_period = 0.1f;
 	timer.scale = 0.1f;
@@ -38,12 +54,14 @@ void scene_structure::initialize()
 	beta = 0.05;
 	mu = 0.92f;
 	vepsilon = 0.30f;
+
 }
 
 
 
 void scene_structure::display()
 {
+
 	// Display of the skybox (*)
 	// ***************************************** //
 	draw(skybox, environment);
@@ -76,6 +94,23 @@ void scene_structure::display()
 	// Display the result
 	sphere_display();
 
+	draw(queue, environment);
+	if (cur_control == 1)
+	{
+		control_sphere1.shading.color = { 0,0,1 };
+	}
+	else if (cur_control == 2)
+	{
+		control_sphere1.shading.color = { 1,0,0 };
+		control_sphere2.shading.color = { 0,0,1 };
+	}
+	else
+	{
+		control_sphere2.shading.color = { 1,1,0 };
+		control_sphere1.shading.color = { 1,0,0 };
+	}
+	draw(control_sphere1, environment);
+	draw(control_sphere2, environment);
 
 	if (gui.display_frame)
 		draw(global_frame, environment);
@@ -95,6 +130,14 @@ void scene_structure::sphere_display()
 		sphere.shading.color = particle.c;
 		draw(sphere, environment);
 	}
+}
+
+void scene_structure::refresh_control_positions()
+{
+	control_sphere1.transform.translation = ctrl1;
+	control_sphere2.transform.translation = ctrl2;
+	queue.clear();
+	queue.initialize(mesh_primitive_cylinder(queue_radius, ctrl1, ctrl2), "queue");
 }
 
 
@@ -140,7 +183,6 @@ void scene_structure::add_balls()
 		particle.m = 200.0f; //200g
 
 		particles.push_back(particle);
-
 	}
 
 }

@@ -5,6 +5,7 @@
 #include "simulation/simulation.hpp"
 
 using namespace std;
+using namespace cgp;
 
 // The element of the GUI that are not already stored in other structures
 struct gui_parameters {
@@ -31,9 +32,19 @@ struct scene_structure {
 	// ****************************** //
 	// Elements and shapes of the scene
 	// ****************************** //
-	cgp::mesh_drawable sphere;
-	cgp::mesh_drawable plane;
-	cgp::skybox_drawable skybox;
+	mesh_drawable sphere;
+	mesh_drawable plane;
+	skybox_drawable skybox;
+
+	int cur_control;
+	
+	vec3 ctrl1, ctrl2;
+	float control_radius;
+	mesh_drawable control_sphere1;
+
+	float queue_radius;
+	mesh_drawable queue;
+	mesh_drawable control_sphere2;
 
 
 	// ****************************** //
@@ -52,6 +63,6 @@ struct scene_structure {
 	void add_balls();
 	//void simulation_step(float dt);
 	void sphere_display();
-
+	void refresh_control_positions();
 	//vector<GLuint> balls_textures;             // Storage of the texture ID used for each ball
 };
