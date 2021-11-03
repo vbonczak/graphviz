@@ -12,6 +12,7 @@ struct particle_structure
     cgp::vec3 c; // Color
     float r;     // Radius
     float m;     // mass
+    GLint text; //texture
 };
 
 void simulate(std::vector<particle_structure>& particles, float dt);

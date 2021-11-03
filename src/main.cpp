@@ -96,7 +96,9 @@ void mouse_move_callback(GLFWwindow* /*window*/, double xpos, double ypos)
 // This function is called everytime a mouse button is clicked/released
 void mouse_click_callback(GLFWwindow* /*window*/, int button, int action, int /*mods*/)
 {
+
 	inputs.mouse.click.update_from_glfw_click(button, action);
+	
 }
 
 // This function is called everytime a keyboard touch is pressed/released
