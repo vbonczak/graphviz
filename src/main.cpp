@@ -2,13 +2,19 @@
 #include "cgp/cgp.hpp" // Give access to the complete CGP library
 #include <iostream> 
 
+ 
 // Custom scene of this code
+#ifdef TROIS_DIMENSION
+#include "scene3d.hpp"
+#else
 #include "scene.hpp"
+#endif
 #include "utils.h"
 
 // *************************** //
 // Global Variables
 // *************************** //
+
 
 // A helper tool to factorize common default functions (Window initialization, code that starts frame, etc)
 cgp::helper_common_scene helper_common;
@@ -99,8 +105,12 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 
 		// Get vector orthogonal to camera orientation
 		const mat4 M = scene.environment.camera.matrix_frame();
-		const vec3 n = { 0,1,0 };//{ M(0,2),M(1,2),M(2,2) };
-
+#ifndef TROIS_DIMENSION
+		const vec3 n = { 0,1,0 }; 
+#else
+		const vec3 n = { M(0,2),M(1,2),M(2,2) };
+#endif
+		 
 		// Compute intersection between current ray and the plane orthogonal to the view direction and passing by the selected object
 		const vec2 cursor = glfw_cursor_coordinates_window(window);
 
@@ -113,10 +123,14 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 		switch (scene.cur_control)
 		{
 		case 1:
+ 
 			intersection_plan(intersct, pos, dir, n, scene.ctrl_pos);
+ 
 			scene.ctrl_pos = intersct;
 			r = scene.boules[0].r;
+#ifndef TROIS_DIMENSION
 			scene.ctrl_pos[1] = 0;
+#endif
 			cue_dir = scene.ctrl_pos - scene.boules[0].p;
 			scene.theta = (cue_dir[0] >= 0 ? 1 : -1) * acos(cue_dir[2] / norm(cue_dir));
 			mindist = scene.queue_length + r;

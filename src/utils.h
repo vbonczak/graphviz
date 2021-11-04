@@ -4,8 +4,11 @@
 #include <iostream> 
 
 // Custom scene of this code
+#ifdef TROIS_DIMENSION
+#include "scene3d.hpp"
+#else
 #include "scene.hpp"
-
+#endif
 
 void droite_souris(const scene_structure& scene, const vec2& cursor, vec3& pos, vec3& direction);
 

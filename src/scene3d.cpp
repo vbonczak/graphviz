@@ -1,5 +1,5 @@
-#ifndef TROIS_DIMENSION
-#include "scene.hpp"
+#ifdef TROIS_DIMENSION
+#include "scene3d.hpp"
 
 
 using namespace cgp;
@@ -34,53 +34,63 @@ void scene_structure::initialize()
 
 void scene_structure::init_objects()
 {
+	// Edges of the containing cube
+	//  Note: this data structure is set for display purpose - don't use it to compute some information on the cube - it would be un-necessarily complex
+	buffer<vec3> cube_wireframe_data;
+	//buffer_stack<float, 6> bounds = { lower_bounds[0],lower_bounds[1],lower_bounds[2], upper_bounds[0],upper_bounds[1],upper_bounds[2] };
 
-	mesh plane_mesh = mesh_primitive_quadrangle({ 0, 0, 0 },
-		{ H, 0, 0 },
-		{ H, 0, L },
-		{ 0, 0, L });
+	lower_bounds = { -H / 2, -H / 2, -L / 2 };
+	upper_bounds = { H / 2, H / 2, L / 2 };
 
-	plane.initialize(plane_mesh, "plan");
+	cube_wireframe_data = { {lower_bounds[0],lower_bounds[1],lower_bounds[2]},{upper_bounds[0],lower_bounds[1],lower_bounds[2]}, {upper_bounds[0],lower_bounds[1],lower_bounds[2]},{upper_bounds[0],upper_bounds[1],lower_bounds[2]}, {upper_bounds[0],upper_bounds[1],lower_bounds[2]},{lower_bounds[0],upper_bounds[1],lower_bounds[2]}, {lower_bounds[0],upper_bounds[1],lower_bounds[2]},{lower_bounds[0],lower_bounds[1],lower_bounds[2]},
+	   {lower_bounds[0],lower_bounds[1],upper_bounds[2]} ,{upper_bounds[0],lower_bounds[1],upper_bounds[2]},  {upper_bounds[0],lower_bounds[1],upper_bounds[2]}, {upper_bounds[0],upper_bounds[1],upper_bounds[2]},  {upper_bounds[0],upper_bounds[1],upper_bounds[2]}, {lower_bounds[0],upper_bounds[1],upper_bounds[2]},  {lower_bounds[0],upper_bounds[1],upper_bounds[2]}, {lower_bounds[0],lower_bounds[1],upper_bounds[2]},
+	   {lower_bounds[0],lower_bounds[1],lower_bounds[2]},{lower_bounds[0],lower_bounds[1],upper_bounds[2]}, {upper_bounds[0],lower_bounds[1],lower_bounds[2]},{upper_bounds[0],lower_bounds[1],upper_bounds[2]}, {upper_bounds[0],upper_bounds[1],lower_bounds[2]},{upper_bounds[0],upper_bounds[1],upper_bounds[2]},   {lower_bounds[0],upper_bounds[1],lower_bounds[2]},{lower_bounds[0],upper_bounds[1],upper_bounds[2]} };
 
-	//Les bords
-	mesh bord_mesh = mesh_primitive_quadrangle({ -H / 2, 0, -L / 2 }, { -H / 2, h , -L / 2 }, { H / 2, h, -L / 2 }, { H / 2, 0, -L / 2 });
-	bord1.initialize(bord_mesh, "bord1");
-	bord2.initialize(bord_mesh, "bord2");
-	bord2.transform.translation = { 0, 0, L };
-	bord_mesh = mesh_primitive_quadrangle({ -H / 2, 0, -L / 2 }, { -H / 2, h , -L / 2 }, { -H / 2, h, L / 2 }, { -H / 2, 0, L / 2 });
-	bord3.initialize(bord_mesh, "bord3");
-	bord4.initialize(bord_mesh, "bord4");
-	bord4.transform.translation = { H, 0, 0 };
+	cube_wireframe.initialize(cube_wireframe_data, "cube wireframe");
 
-	mesh hole = mesh_primitive_disc(0.06f, { -H / 2,0.001f,-L / 2 }, { 0,1,0 });
+	mesh hole = mesh_primitive_sphere(0.06f, { -H / 2,-H/2,-L / 2 });
 	hole1.initialize(hole, "hole1");
 	hole2.initialize(hole, "hole2");
 	hole3.initialize(hole, "hole3");
 	hole4.initialize(hole, "hole4");
 	hole5.initialize(hole, "hole5");
 	hole6.initialize(hole, "hole6");
+	hole7.initialize(hole, "hole7");
+	hole8.initialize(hole, "hole8");
+	hole9.initialize(hole, "hole9");
+	hole10.initialize(hole, "hole10");
+	hole11.initialize(hole, "hole11");
+	hole12.initialize(hole, "hole12");
 	hole2.transform.translation = { 0,0,L / 2 };
 	hole3.transform.translation = { 0,0,L };
 	hole4.transform.translation = { H,0,0 };
 	hole5.transform.translation = { H,0,L / 2 };
 	hole6.transform.translation = { H,0,L };
-
+	hole7.transform.translation =  { 0, H,0 };
+	hole8.transform.translation = { 0, H, L / 2 };
+	hole9.transform.translation = { 0, H, L };
+	hole10.transform.translation = { H, H,0 };
+	hole11.transform.translation = { H, H,L / 2 };
+	hole12.transform.translation = { H, H,L };
+		
 	hole1.shading.color = { 0,0,0 };
 	hole2.shading.color = { 0,0,0 };
 	hole3.shading.color = { 0,0,0 };
 	hole4.shading.color = { 0,0,0 };
 	hole5.shading.color = { 0,0,0 };
 	hole6.shading.color = { 0,0,0 };
+	hole7.shading.color = { 0,0,0 };
+	hole8.shading.color = { 0,0,0 };
+	hole9.shading.color = { 0,0,0 };
+	hole10.shading.color = { 0,0,0 };
+	hole11.shading.color = { 0,0,0 };
+	hole12.shading.color = { 0,0,0 };
 
-	texture_bois = opengl_load_texture_image("assets/bois.jpg");
-	bord4.texture = bord3.texture = bord2.texture = bord1.texture = texture_bois;
 
+	 
 	sphere.shading.color = { 0.8f, 0.5f, 0.7f };
 	sphere.shading.phong.specular = 0.85f;
-	plane.shading.color = { 0.0f, 0x6d / 255.f, 0.0f };
-	plane.shading.phong.specular = .2f;
-	plane.transform.translation = { -H / 2,0,-L / 2 };
-	control_radius = 0.06f;
+	 control_radius = 0.06f;
 
 	//Contrôles
 	control_sphere.initialize(mesh_primitive_sphere(control_radius), "ctrl");
@@ -114,26 +124,18 @@ void scene_structure::display()
 	timer.update();
 	environment.light = environment.camera.position();
 
-	if (gui.display_wireframe)
-	{
-		draw_wireframe(plane, environment);
-	}
-	else
-	{
-		draw(plane, environment);
-	}
-
-	draw(bord1, environment);
-	draw(bord2, environment);
-	draw(bord3, environment);
-	draw(bord4, environment);
-
 	draw(hole1, environment);
 	draw(hole2, environment);
 	draw(hole3, environment);
 	draw(hole4, environment);
 	draw(hole5, environment);
 	draw(hole6, environment);
+	draw(hole7, environment);
+	draw(hole8, environment);
+	draw(hole9, environment);
+	draw(hole10, environment);
+	draw(hole11, environment);
+	draw(hole12, environment);
 
 	// Call the simulation of the particle system
 	float const dt = 0.1f * timer.scale;
@@ -141,7 +143,7 @@ void scene_structure::display()
 	{
 		shoot_ball();
 	}
-	simulate(boules, dt);
+	simulate3d(boules, dt);
 
 	// Display the result
 	sphere_display();
@@ -168,6 +170,8 @@ void scene_structure::display()
 		queue_reinit();
 		queue_waiting = false;
 	}
+
+	draw(cube_wireframe, environment);
 }
 
 void scene_structure::sphere_display()
@@ -198,7 +202,7 @@ void scene_structure::queue_init()
 	// We want ctrl_pos to be between queue_length and 2*queue_length away from the white ball, and the cue length to be constant
 	vec3 white_pos = boules[0].p;
 	float r = boules[0].r;
-	ctrl_pos = { white_pos[0] + sin(theta) * (cue_white_dist + r + queue_length),white_pos[1],white_pos[2] + cos(theta) * (cue_white_dist + r + queue_length) };
+	ctrl_pos = { white_pos[0] + sin(theta) * (cue_white_dist + r + queue_length),ctrl_pos[1],white_pos[2] + cos(theta) * (cue_white_dist + r + queue_length) };
 	vec3 end_pos = { white_pos[0] + sin(theta) * (cue_white_dist + r),white_pos[1],white_pos[2] + cos(theta) * (cue_white_dist + r) };
 	queue.initialize(mesh_primitive_cylinder(queue_radius, ctrl_pos, end_pos), "queue");
 	queue.shading.color = { 0x63 / 255.f,0,0 };
@@ -280,7 +284,7 @@ void scene_structure::add_balls()
 	boule.r = 0.03f;//6cm de diamètre
 	boule.p = { 0, boule.r + initial_height, -L / 4 };
 	boule.c = { 1,1,1 };
-	boule.v = { 0,-0.2,0 };
+	boule.v = { 0,0,0 };
 	boule.m = 0.2f; //200g
 	boule.in_play = true;
 

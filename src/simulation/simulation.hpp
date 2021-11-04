@@ -26,3 +26,5 @@ void simulate(std::vector<boule_structure>& boules, float dt);
 
 bool over_hole(boule_structure& boule);
 
+void simulate3d(std::vector<boule_structure>& boules, float dt);
+
