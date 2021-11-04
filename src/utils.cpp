@@ -1,4 +1,5 @@
 #include "utils.h"
+ 
 
 //Fonctions issues de la bibliothèque VCL de Damien Rohmer https://github.com/drohmer/inf443-vcl
 //Adaptées pour les besoins du programme.
@@ -11,7 +12,7 @@
 /// <param name="cursor"></param>
 /// <param name="pos"></param>
 /// <param name="direction"></param>
-void droite_souris(const scene_structure& scene, const vec2& cursor, vec3& pos, vec3& direction)
+void droite_souris(scene_base& scene, const vec2& cursor, vec3& pos, vec3& direction)
 {
 	pos = scene.environment.camera.position();
 
@@ -78,8 +79,6 @@ bool intersection_plan(vec3& intersect, const vec3& droite_position, const vec3&
 
 	return false;
 }
-
-
 
 vec2 glfw_cursor_coordinates_window(GLFWwindow* window)
 {

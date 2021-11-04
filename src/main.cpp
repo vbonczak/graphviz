@@ -4,7 +4,9 @@
 
 // Custom scene of this code
 #include "scene.hpp"
-#include "utils.h"
+#include "scene3D.hpp"
+#include "scenebase.h"
+
 
 // *************************** //
 // Global Variables
@@ -17,7 +19,7 @@ cgp::helper_common_scene helper_common;
 cgp::inputs_interaction_parameters inputs;
 
 // The custom structure of the current scene defined in "scene.hpp"
-scene_structure scene;
+scene_structure  scene;
 
 // *************************** //
 // Start of the program
@@ -40,6 +42,7 @@ int main(int, char* argv[])
 
 	// Custom scene initialization
 	std::cout << "Initialize data of the scene ..." << std::endl;
+
 	scene.initialize();
 	std::cout << "Initialization success" << std::endl;
 
@@ -91,89 +94,16 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	inputs.mouse_position_update({ xpos, ypos });
 
-	const bool mouse_click_left = glfw_mouse_pressed_left(window);
-	//const bool key_shift = glfw_key_shift_pressed(window);
-	if (mouse_click_left && scene.cur_control != -1)
-	{
-		//Dans le plan de la caméra
-
-		// Get vector orthogonal to camera orientation
-		const mat4 M = scene.environment.camera.matrix_frame();
-		const vec3 n = { 0,1,0 };//{ M(0,2),M(1,2),M(2,2) };
-
-		// Compute intersection between current ray and the plane orthogonal to the view direction and passing by the selected object
-		const vec2 cursor = glfw_cursor_coordinates_window(window);
-
-		// Droite souris->tout droit
-		vec3 pos, dir, intersct;
-		droite_souris(scene, cursor, pos, dir);
-		// Variables necessary in switch case 1:
-		float r, mindist, maxdist;
-		vec3 cue_dir;
-		switch (scene.cur_control)
-		{
-		case 1:
-			intersection_plan(intersct, pos, dir, n, scene.ctrl_pos);
-			scene.ctrl_pos = intersct;
-			r = scene.boules[0].r;
-			scene.ctrl_pos[1] = 0;
-			cue_dir = scene.ctrl_pos - scene.boules[0].p;
-			scene.theta = (cue_dir[0] >= 0 ? 1 : -1) * acos(cue_dir[2] / norm(cue_dir));
-			mindist = scene.queue_length + r;
-			maxdist = 2 * scene.queue_length + r;
-			scene.cue_white_dist = norm(cue_dir) < mindist ? 0 : (norm(cue_dir) > maxdist ? scene.queue_length : norm(cue_dir)-scene.queue_length-r);
-			scene.refresh_control_positions();
-			break;
-			break;
-		default:
-			break;
-		}
-	}
-	else
-	{
-		// Default trackball mode - change this behaviour as you wish
-		//camera_standard_behavior_rotation_spherical_coordinates(scene.environment.camera, inputs);
-		camera_standard_behavior_rotation_trackball(scene.environment.camera, inputs);
-	}
+	scene.mouse_move_callback(window, xpos, ypos, inputs);
 }
 
 // This function is called everytime a mouse button is clicked/released
-void mouse_click_callback(GLFWwindow* window, int button, int action, int /*mods*/)
+void mouse_click_callback(GLFWwindow* window, int button, int action, int mods)
 {
 
 	inputs.mouse.click.update_from_glfw_click(button, action);
 
-	//Code extrait de VCL
-	// 
-	// Check that the mouse is clicked (drag and drop)
-	const bool mouse_click_left = glfw_mouse_pressed_left(window);
-	//const bool key_shift = glfw_key_shift_pressed(window);
-	const vec2 cursor = glfw_cursor_coordinates_window(window);
-	 
-	if (mouse_click_left)
-	{
-		// Droite souris->sphère
-		vec3 pos, dir;
-		droite_souris(scene, cursor, pos, dir);
-
-		float distance_min = 0.1f;
-
-		vec3 intersect;
-		if (intersection_droite(intersect, pos, dir, scene.ctrl_pos, scene.control_radius)) //controle
-		{
-			const float distance = norm(intersect - pos);
-			if (scene.cur_control == -1 || distance < distance_min)
-			{
-				distance_min = distance;
-				scene.cur_control = 1;
-			}
-		} 
-		else
-			scene.cur_control = -1;
-
-	}
-	else
-		scene.cur_control = -1;
+	scene.mouse_click_callback(window, button, action, mods);
 }
 
 // This function is called everytime a keyboard touch is pressed/released

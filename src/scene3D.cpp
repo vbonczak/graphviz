@@ -1,9 +1,9 @@
-#include "scene.hpp"
+#include "scene3D.hpp"
 
 
 using namespace cgp;
 
-void scene_structure::initialize()
+void scene_structure3D::initialize()
 {
 	// Initialize the skybox (*)
 	// ***************************************** //
@@ -30,34 +30,14 @@ void scene_structure::initialize()
 
 }
 
-void scene_structure::init_objects()
+void scene_structure3D::init_objects()
 {
+	buffer<vec3> cube_wireframe_data = { {-1,-1,-1},{1,-1,-1}, {1,-1,-1},{1,1,-1}, {1,1,-1},{-1,1,-1}, {-1,1,-1},{-1,-1,-1},
+			{-1,-1,1} ,{1,-1,1},  {1,-1,1}, {1,1,1},  {1,1,1}, {-1,1,1},  {-1,1,1}, {-1,-1,1},
+			{-1,-1,-1},{-1,-1,1}, {1,-1,-1},{1,-1,1}, {1,1,-1},{1,1,1},   {-1,1,-1},{-1,1,1} };
+	cube_wireframe.initialize(cube_wireframe_data, "cube wireframe");
 
-	mesh plane_mesh = mesh_primitive_quadrangle({ 0, 0, 0 },
-		{ H, 0, 0 },
-		{ H, 0, L },
-		{ 0, 0, L });
-
-	plane.initialize(plane_mesh, "plan");
-
-	//Les bords
-	mesh bord_mesh = mesh_primitive_quadrangle({ -H / 2, 0, -L / 2 }, { -H / 2, h , -L / 2 }, { H / 2, h, -L / 2 }, { H / 2, 0, -L / 2 });
-	bord1.initialize(bord_mesh, "bord1");
-	bord2.initialize(bord_mesh, "bord2");
-	bord2.transform.translation = { 0, 0, L };
-	bord_mesh = mesh_primitive_quadrangle({ -H / 2, 0, -L / 2 }, { -H / 2, h , -L / 2 }, { -H / 2, h, L / 2 }, { -H / 2, 0, L / 2 });
-	bord3.initialize(bord_mesh, "bord3");
-	bord4.initialize(bord_mesh, "bord4");
-	bord4.transform.translation = { H, 0, 0 };
-
-	texture_bois = opengl_load_texture_image("assets/bois.jpg");
-	bord4.texture = bord3.texture = bord2.texture = bord1.texture = texture_bois;
-
-	sphere.shading.color = { 0.8f, 0.5f, 0.7f };
-	sphere.shading.phong.specular = 0.85f;
-	plane.shading.color = { 0.0f, 0x6d / 255.f, 0.0f };
-	plane.shading.phong.specular = .2f;
-	plane.transform.translation = { -H / 2,0,-L / 2 };
+	sphere.initialize(mesh_primitive_sphere(), "Sphere");
 	control_radius = 0.06f;
 
 	//Contrôles
@@ -80,7 +60,7 @@ void scene_structure::init_objects()
 	cur_control = -1;
 }
 
-void scene_structure::display()
+void scene_structure3D::display()
 {
 	// Display of the skybox (*)
 	// ***************************************** //
@@ -91,20 +71,7 @@ void scene_structure::display()
 
 	timer.update();
 	environment.light = environment.camera.position();
-
-	if (gui.display_wireframe)
-	{
-		draw_wireframe(plane, environment);
-	}
-	else
-	{
-		draw(plane, environment);
-	}
-
-	draw(bord1, environment);
-	draw(bord2, environment);
-	draw(bord3, environment);
-	draw(bord4, environment);
+ 
 
 	// Call the simulation of the particle system
 	float const dt = 0.01f * timer.scale;
@@ -137,7 +104,7 @@ void scene_structure::display()
 	}
 }
 
-void scene_structure::sphere_display()
+void scene_structure3D::sphere_display()
 {
 	// Display the particles as spheres
 	size_t const N = boules.size();
@@ -154,13 +121,13 @@ void scene_structure::sphere_display()
 
 
 
-void scene_structure::refresh_control_positions()
+void scene_structure3D::refresh_control_positions()
 {
 	control_sphere.transform.translation = ctrl_pos;
 	queue_reinit();
 }
 
-void scene_structure::queue_init()
+void scene_structure3D::queue_init()
 {
 	// We want ctrl_pos to be between queue_length and 2*queue_length away from the white ball, and the cue length to be constant
 	vec3 white_pos = boules[0].p;
@@ -181,7 +148,7 @@ void scene_structure::queue_init()
 	queue.shading.color = { 0x63 / 255.f,0,0 };
 }
 
-void scene_structure::queue_reinit()
+void scene_structure3D::queue_reinit()
 {
 	queue.clear();
 	queue_init();
@@ -193,7 +160,7 @@ void scene_structure::queue_reinit()
 	ctrl_pos = queue_length * ctrl_pos;
 }*/
 
-void scene_structure::launch_ball()
+void scene_structure3D::launch_ball()
 {
 	//Lancement de la boule, sa vitesse devient >0
 
@@ -201,89 +168,16 @@ void scene_structure::launch_ball()
 	queue_waiting = true;
 }
 
-void scene_structure::mouse_move_callback(GLFWwindow* window, double xpos, double ypos, inputs_interaction_parameters& inputs)
+void scene_structure3D::mouse_move_callback(GLFWwindow* window, double xpos, double ypos, inputs_interaction_parameters& inputs)
 {
 	const bool mouse_click_left = glfw_mouse_pressed_left(window);
 
-	//const bool key_shift = glfw_key_shift_pressed(window);
-	if (mouse_click_left && cur_control != -1)
-	{
-		//Dans le plan de la caméra
 
-		// Get vector orthogonal to camera orientation
-		const mat4 M =  environment.camera.matrix_frame();
-		const vec3 n = { 0,1,0 };//{ M(0,2),M(1,2),M(2,2) };
-
-		// Compute intersection between current ray and the plane orthogonal to the view direction and passing by the selected object
-		const vec2 cursor = glfw_cursor_coordinates_window(window);
-
-		// Droite souris->tout droit
-		vec3 pos, dir, intersct;
-		scene_base& d = *this;
-		droite_souris(d, cursor, pos, dir);
-		// Variables necessary in switch case 1:
-		float r, mindist, maxdist;
-		vec3 cue_dir;
-		switch (cur_control)
-		{
-		case 1:
-			intersection_plan(intersct, pos, dir, n, ctrl_pos);
-			ctrl_pos = intersct;
-			r =  boules[0].r;
-			 ctrl_pos[1] = 0;
-			cue_dir =  ctrl_pos -  boules[0].p;
-			 theta = (cue_dir[0] >= 0 ? 1 : -1) * acos(cue_dir[2] / norm(cue_dir));
-			mindist =  queue_length + r;
-			maxdist = 2 *  queue_length + r;
-			 cue_white_dist = norm(cue_dir) < mindist ? 0 : (norm(cue_dir) > maxdist ?  queue_length : norm(cue_dir) -  queue_length - r);
-			 refresh_control_positions();
-			break;
-			break;
-		default:
-			break;
-		}
-	}
-	else
-	{
-		// Default trackball mode - change this behaviour as you wish
-		//camera_standard_behavior_rotation_spherical_coordinates(scene.environment.camera, inputs);
-		camera_standard_behavior_rotation_trackball(environment.camera, inputs);
-	}
 }
 
-void scene_structure::mouse_click_callback(GLFWwindow* window, int button, int action, int /*mods*/)
+void scene_structure3D::mouse_click_callback(GLFWwindow* window, int button, int action, int /*mods*/)
 {
-	//Code extrait de VCL
-	// 
-	// Check that the mouse is clicked (drag and drop)
-	const bool mouse_click_left = glfw_mouse_pressed_left(window);
-	//const bool key_shift = glfw_key_shift_pressed(window);
-	const vec2 cursor = glfw_cursor_coordinates_window(window);
 
-	if (mouse_click_left)
-	{
-		// Droite souris->sphère
-		vec3 pos, dir;
-		droite_souris(*this, cursor, pos, dir);
-
-		float distance_min = 0.1f;
-
-		vec3 intersect;
-		if (intersection_droite(intersect, pos, dir, ctrl_pos, control_radius)) //controle
-		{
-			const float distance = norm(intersect - pos);
-			if (cur_control == -1 || distance < distance_min)
-			{
-				distance_min = distance;
-				cur_control = 1;
-			}
-		}
-		else
-			cur_control = -1;
-
-	}
-	else
-		cur_control = -1;
 }
 
 buffer<vec3> const colors = { {1,1,1},//blanche
@@ -321,7 +215,7 @@ buffer<vec3> const colors = { {1,1,1},//blanche
 	{0xB2 / 255.,0x08 / 255.,0x00 / 255.},*/
 };
 
-void scene_structure::add_balls()
+void scene_structure3D::add_balls()
 {
 	// Emit particle with random velocity
 	// Assume first that all particles have the same radius and mass
@@ -381,7 +275,7 @@ void scene_structure::add_balls()
 	}
 }
 
-void scene_structure::display_gui()
+void scene_structure3D::display_gui()
 {
 	//ImGui::Checkbox("Frame", &gui.display_frame);
 	//ImGui::SliderFloat("Time scale", &timer.scale, 0.05f, 2.0f, "%.2f s");
