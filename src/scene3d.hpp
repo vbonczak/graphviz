@@ -41,6 +41,7 @@ struct scene_structure {
 
 	float queue_radius;
 	float theta;
+	float phi;
 	float cue_white_dist;
 	float queue_length;
 	bool queue_waiting;

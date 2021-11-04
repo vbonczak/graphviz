@@ -2,7 +2,7 @@
 #include "cgp/cgp.hpp" // Give access to the complete CGP library
 #include <iostream> 
 
- 
+#define TROIS_DIMENSION
 // Custom scene of this code
 #ifdef TROIS_DIMENSION
 #include "scene3d.hpp"
@@ -132,7 +132,12 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 			scene.ctrl_pos[1] = 0;
 #endif
 			cue_dir = scene.ctrl_pos - scene.boules[0].p;
+#ifdef TROIS_DIMENSION
+			scene.phi = asin(cue_dir[1] / norm(cue_dir));
+			scene.theta = (cue_dir[0] >= 0 ? 1 : -1) * acos(cue_dir[2] / (cos(scene.phi) * norm(cue_dir)));
+#else
 			scene.theta = (cue_dir[0] >= 0 ? 1 : -1) * acos(cue_dir[2] / norm(cue_dir));
+#endif
 			mindist = scene.queue_length + r;
 			maxdist = 2 * scene.queue_length + r;
 			scene.cue_white_dist = norm(cue_dir) < mindist ? 0 : (norm(cue_dir) > maxdist ? scene.queue_length : norm(cue_dir)-scene.queue_length-r);
@@ -195,7 +200,7 @@ void keyboard_callback(GLFWwindow* /*window*/, int key, int, int action, int /*m
 {
 	inputs.keyboard.update_from_glfw_key(key, action);
 
-	if (key == 32)
+	if (key == 32 && !scene.queue_waiting)
 	{
 		scene.shoot_ball();
 	}

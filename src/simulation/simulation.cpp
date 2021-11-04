@@ -113,7 +113,9 @@ bool over_hole(boule_structure& boule)
 		if (norm(boule.p - holes[j]) < 2 * boule.r)
 		{
 			boule.in_play = false;
+#ifndef TROIS_DIMENSION
 			boule.v = { 0,0,0 };
+#endif
 			return true;
 		}
 	}
@@ -128,7 +130,7 @@ void simulate3d(std::vector<boule_structure>& boules, float dt)
 	{
 		boule_structure& boule = boules[k];
 
-		boule.v = (1 - 0.9f * dt) * boule.v;
+		boule.v = (1 - 1.5f * dt) * boule.v;
 		boule.p = boule.p + dt * boule.v;
 	}
 
@@ -136,54 +138,57 @@ void simulate3d(std::vector<boule_structure>& boules, float dt)
 	for (size_t k = 0; k < N; ++k)
 	{
 		boule_structure& boule = boules[k];
-		//Collision avec les faces du cube, face de la table traitée séparément pour les trous
-		for (size_t j = 0; j < planesA.size(); j++)
+		//Collision avec les faces du cube
+		if (boule.in_play && !over_hole(boule))
 		{
-			float d = dot(boule.p - planesA[j], normals[j]);
-			if (d < boule.r)
+			for (size_t j = 0; j < planesA.size(); j++)
 			{
-				vec3 vpar, vperp;
-				vperp = dot(boule.v, normals[j]) * normals[j];
-				vpar = boule.v - vperp;
-
-				boule.v = alpha * vpar - beta * vperp;
-				boule.p += (boule.r - d) * normals[j];
-			}
-		}
-
-		//Collision entre sphères
-		for (size_t i = 0; i < k; i++)
-		{
-
-			boule_structure& boule2 = boules[i];
-			float dist = norm(boule.p - boule2.p);
-			if (dist <= boule2.r + boule.r)
-			{
-				//Ces deux sphères sont en collision
-				//Formule générale avec des masses différentes
-				vec3 u = (boule.p - boule2.p) / dist;
-				if (norm(boule.v) > vepsilon || norm(boule2.v) > vepsilon)
+				float d = dot(boule.p - planesA[j], normals[j]);
+				if (d < boule.r)
 				{
-					float j = 2 * dot(boule2.v - boule.v, u) * (boule.m * boule2.m) / (boule.m + boule2.m);
+					vec3 vpar, vperp;
+					vperp = dot(boule.v, normals[j]) * normals[j];
+					vpar = boule.v - vperp;
 
-					boule.v = alpha * boule.v + u * beta * j / boule.m;
-					boule2.v = alpha * boule2.v - u * beta * j / boule2.m;
+					boule.v = alpha * vpar - beta * vperp;
+					boule.p += (boule.r - d) * normals[j];
 				}
-				else
-				{
-					boule.v = mu * boule.v;
-					boule2.v = mu * boule2.v;
-				}
-
-				//Position corrigée
-				float d = boule.r + boule2.r - dist;
-				boule.p += (d / 2) * u;
-				boule2.p -= (d / 2) * u;
-
-				//Formule avec m1=m2
-
 			}
 
+			//Collision entre sphères
+			for (size_t i = 0; i < k; i++)
+			{
+
+				boule_structure& boule2 = boules[i];
+				float dist = norm(boule.p - boule2.p);
+				if (dist <= boule2.r + boule.r)
+				{
+					//Ces deux sphères sont en collision
+					//Formule générale avec des masses différentes
+					vec3 u = (boule.p - boule2.p) / dist;
+					if (norm(boule.v) > vepsilon || norm(boule2.v) > vepsilon)
+					{
+						float j = 2 * dot(boule2.v - boule.v, u) * (boule.m * boule2.m) / (boule.m + boule2.m);
+
+						boule.v = alpha * boule.v + u * beta * j / boule.m;
+						boule2.v = alpha * boule2.v - u * beta * j / boule2.m;
+					}
+					else
+					{
+						boule.v = mu * boule.v;
+						boule2.v = mu * boule2.v;
+					}
+
+					//Position corrigée
+					float d = boule.r + boule2.r - dist;
+					boule.p += (d / 2) * u;
+					boule2.p -= (d / 2) * u;
+
+					//Formule avec m1=m2
+
+				}
+
+			}
 		}
 	}
 }

@@ -22,6 +22,8 @@ void scene_structure::initialize()
 
 	theta = -pi;
 
+	phi = 0;
+
 	cue_white_dist = 0;
 
 	alpha = 0.98f;
@@ -139,7 +141,7 @@ void scene_structure::display()
 
 	// Call the simulation of the particle system
 	float const dt = 0.1f * timer.scale;
-	if (ImGui::Button("Shoot!"))
+	if (ImGui::Button("Shoot!") && !queue_waiting)
 	{
 		shoot_ball();
 	}
@@ -202,8 +204,8 @@ void scene_structure::queue_init()
 	// We want ctrl_pos to be between queue_length and 2*queue_length away from the white ball, and the cue length to be constant
 	vec3 white_pos = boules[0].p;
 	float r = boules[0].r;
-	ctrl_pos = { white_pos[0] + sin(theta) * (cue_white_dist + r + queue_length),ctrl_pos[1],white_pos[2] + cos(theta) * (cue_white_dist + r + queue_length) };
-	vec3 end_pos = { white_pos[0] + sin(theta) * (cue_white_dist + r),white_pos[1],white_pos[2] + cos(theta) * (cue_white_dist + r) };
+	ctrl_pos = { white_pos[0] + cos(phi)*sin(theta) * (cue_white_dist + r + queue_length),white_pos[1]+sin(phi)* (cue_white_dist + r + queue_length),white_pos[2] + cos(phi)*cos(theta) * (cue_white_dist + r + queue_length) };
+	vec3 end_pos = { white_pos[0] + cos(phi)*sin(theta) * (cue_white_dist + r),white_pos[1] + sin(phi) * (cue_white_dist + r),white_pos[2] + cos(phi)*cos(theta) * (cue_white_dist + r) };
 	queue.initialize(mesh_primitive_cylinder(queue_radius, ctrl_pos, end_pos), "queue");
 	queue.shading.color = { 0x63 / 255.f,0,0 };
 }
@@ -216,7 +218,7 @@ void scene_structure::queue_reinit()
 
 void scene_structure::shoot_ball()
 {
-	boules[0].v = { -sin(theta) * cue_white_dist * 20,0,-cos(theta) * cue_white_dist * 20 };
+	boules[0].v = { -cos(phi)*sin(theta) * cue_white_dist * 20,-sin(phi) * cue_white_dist * 20,-cos(phi)*cos(theta) * cue_white_dist * 20 };
 	//ensuite on place ce paramètre pour replacer correctement la queue quand la boule s'immobilisera
 	queue_waiting = true;
 }
@@ -278,11 +280,9 @@ void scene_structure::add_balls()
 		boules.push_back(particle);
 	}*/
 
-	float initial_height = 0.1f;
-
 	boule_structure boule;
 	boule.r = 0.03f;//6cm de diamètre
-	boule.p = { 0, boule.r + initial_height, -L / 4 };
+	boule.p = { 0, 0, -L / 4 };
 	boule.c = { 1,1,1 };
 	boule.v = { 0,0,0 };
 	boule.m = 0.2f; //200g
@@ -290,29 +290,32 @@ void scene_structure::add_balls()
 
 	boules.push_back(boule);
 
-	int yellows = 7, reds = 7;
+	int yellows = 27, reds = 27;
 
 	for (int i = 0; i < 5; i++)
 	{
 		for (int j = 0; j < i + 1; j++)
 		{
-			boule.p = { (2 * j - i) * boule.r, boule.r + initial_height, L / 4 + sqrt(3) * boule.r * i };
-			if (i == 2 && j == 1)
+			for (int k = 0; k < i + 1; k++)
 			{
-				boule.c = { 0,0,0 };
+				boule.p = { (2 * j - i) * boule.r, (2 * k - i) * boule.r, L / 4 + sqrt(3) * boule.r * i };
+				if (i == 2 && j == 1 && k==1)
+				{
+					boule.c = { 0,0,0 };
+					boules.push_back(boule);
+					continue;
+				}
+				if (yellows == 0 || (reds > 0 && std::rand() % 2 == 0))
+				{
+					boule.c = { 1,0,0 };
+					boules.push_back(boule);
+					reds--;
+					continue;
+				}
+				boule.c = { 1,1,0 };
 				boules.push_back(boule);
-				continue;
+				yellows--;
 			}
-			if (yellows == 0 || (reds > 0 && std::rand() % 2 == 0))
-			{
-				boule.c = { 1,0,0 };
-				boules.push_back(boule);
-				reds--;
-				continue;
-			}
-			boule.c = { 1,1,0 };
-			boules.push_back(boule);
-			yellows--;
 		}
 	}
 }
@@ -324,7 +327,8 @@ void scene_structure::display_gui()
 	//ImGui::SliderFloat("Time to add new sphere", &timer.event_period, 0.05f, 2.0f, "%.2f s");
 	//ImGui::SliderFloat("Friction", &alpha, 0.05f, 1.0f, "%.2f");
 	//ImGui::SliderFloat("Impact", &beta, 0.05f, 1.0f, "%.2f");
-	ImGui::SliderFloat("Cue angle", &theta, -pi, pi, "%.2f");
+	ImGui::SliderFloat("Cue x/y angle", &theta, -pi, pi, "%.2f");
+	ImGui::SliderFloat("Cue z angle", &phi, -pi / 2, pi / 2, "%.2f");
 	ImGui::SliderFloat("Cue force", &cue_white_dist, 0, queue_length, "%.2f");
 	//ImGui::SliderFloat("Static friction", &mu, 0.05f, 1.0f, "%.2f");
 	//ImGui::SliderFloat("Vepsilon", &vepsilon, 0.01f, 10.0f, "%.2f");  
