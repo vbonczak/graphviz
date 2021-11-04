@@ -161,7 +161,8 @@ void scene_structure::queue_init()
 {
 	vec3 white_pos = boules[0].p;
 	//std::cout << white_pos << "   " << ctrl_pos << endl;
-	//ctrl_pos = white_pos + queue_length * ((ctrl_pos - white_pos) / norm(ctrl_pos - white_pos));
+	ctrl_pos[1] = white_pos[1];
+	ctrl_pos = white_pos + queue_length * ((ctrl_pos - white_pos) / norm(ctrl_pos - white_pos));
 	queue.initialize(mesh_primitive_cylinder(queue_radius, ctrl_pos, boules[0].p), "queue");
 	queue.shading.color = { 0x63 / 255.f,0,0 };
 }
