@@ -69,8 +69,8 @@ bool intersection_plan(vec3& intersect, const vec3& droite_position, const vec3&
 vec2 glfw_cursor_coordinates_window(GLFWwindow* window)
 {
 	// Window size
-	int w = 0, h = 0;
-	glfwGetWindowSize(window, &w, &h);
+	int w = 0, _h = 0;
+	glfwGetWindowSize(window, &w, &_h);
 
 	// Current cursor position
 	double xpos = 0, ypos = 0;
@@ -78,7 +78,7 @@ vec2 glfw_cursor_coordinates_window(GLFWwindow* window)
 
 	// Convert pixel coordinates to relative screen coordinates between [-1,1]
 	const float x = 2 * float(xpos) / float(w) - 1;
-	const float y = 1 - 2 * float(ypos) / float(h);
+	const float y = 1 - 2 * float(ypos) / float(_h);
 
 	return { x,y };
 }

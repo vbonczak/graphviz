@@ -29,7 +29,7 @@ void scene_structure::initialize()
 
 void scene_structure::init_objects()
 {
-	
+
 	mesh plane_mesh = mesh_primitive_quadrangle({ 0, 0, 0 },
 		{ H, 0, 0 },
 		{ H, 0, L },
@@ -46,14 +46,14 @@ void scene_structure::init_objects()
 	bord3.initialize(bord_mesh, "bord3");
 	bord4.initialize(bord_mesh, "bord4");
 	bord4.transform.translation = { H, 0, 0 };
-	 
+
 	texture_bois = opengl_load_texture_image("assets/bois.jpg");
 	bord4.texture = bord3.texture = bord2.texture = bord1.texture = texture_bois;
 
 	sphere.shading.color = { 0.8f, 0.5f, 0.7f };
 	sphere.shading.phong.specular = 0.85f;
 	plane.shading.color = { 0.0f, 0x6d / 255.f, 0.0f };
-	plane.shading.phong.specular = .0f;
+	plane.shading.phong.specular = .2f;
 	plane.transform.translation = { -H / 2,0,-L / 2 };
 	control_radius = 0.06f;
 
@@ -67,13 +67,13 @@ void scene_structure::init_objects()
 
 	add_balls();
 
-	
+
 	queue_radius = 0.02f;
 	queue_length = 1.5f;
 	queue_init();
 	queue_waiting = true;
 
-	ctrl_pos = { 0,0,-L/4-queue_length };
+	ctrl_pos = { 0,0,-L / 4 - queue_length };
 	control_sphere.transform.translation = ctrl_pos;
 
 	cur_control = -1;
@@ -81,7 +81,6 @@ void scene_structure::init_objects()
 
 void scene_structure::display()
 {
-
 	// Display of the skybox (*)
 	// ***************************************** //
 	draw(skybox, environment);
@@ -118,7 +117,7 @@ void scene_structure::display()
 
 	// Display the result
 	sphere_display();
-	if (~queue_waiting)
+	if (!queue_waiting)
 	{
 		refresh_control_positions();
 		draw(queue, environment);
@@ -170,7 +169,7 @@ void scene_structure::queue_init()
 {
 	vec3 white_pos = boules[0].p;
 	//std::cout << white_pos << "   " << ctrl_pos << endl;
-	ctrl_pos = white_pos + queue_length*((ctrl_pos-white_pos) / norm(ctrl_pos-white_pos));
+	//ctrl_pos = white_pos + queue_length * ((ctrl_pos - white_pos) / norm(ctrl_pos - white_pos));
 	queue.initialize(mesh_primitive_cylinder(queue_radius, ctrl_pos, boules[0].p), "queue");
 	queue.shading.color = { 0x63 / 255.f,0,0 };
 }
@@ -237,7 +236,7 @@ void scene_structure::add_balls()
 	/*for (size_t i = 0; i < colors.size(); i++)
 	{
 		//balls_textures.push_back(opengl_load_texture_image("assets/" + to_string(i % 7 + 1) + ".jpg"));
-		
+
 		//float const theta = rand_interval(0, 2 * pi);
 		//vec3 const v = vec3(5.0f * std::cos(theta), 50.0f, 5.0f * std::sin(theta));
 
@@ -256,7 +255,7 @@ void scene_structure::add_balls()
 
 	boule_structure boule;
 	boule.r = 0.03f;//6cm de diamètre
-	boule.p = {	 0, boule.r+ initial_height, -L/4 };
+	boule.p = { 0, boule.r + initial_height, -L / 4 };
 	boule.c = { 1,1,1 };
 	boule.v = { 0,-0.2,0 };
 	boule.m = 200.0f; //200g
@@ -269,7 +268,7 @@ void scene_structure::add_balls()
 	{
 		for (int j = 0; j < i + 1; j++)
 		{
-			boule.p = {(2 * j - i) * boule.r, boule.r+ initial_height, L / 4 + sqrt(3) * boule.r * i };
+			boule.p = { (2 * j - i) * boule.r, boule.r + initial_height, L / 4 + sqrt(3) * boule.r * i };
 			if (i == 2 && j == 1)
 			{
 				boule.c = { 0,0,0 };
