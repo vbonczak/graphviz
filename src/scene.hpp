@@ -45,6 +45,8 @@ struct scene_structure {
 	
 
 	float queue_radius;
+	float theta;
+	float cue_white_dist;
 	float queue_length;
 	bool queue_waiting;
 	mesh_drawable queue; 
@@ -81,7 +83,6 @@ struct scene_structure {
 	void refresh_control_positions();
 	void queue_init();
 	void queue_reinit();
-	void update_queue_pos(); // Keeps the length of the cue constant
 	void launch_ball();
 	//vector<GLuint> balls_textures;             // Storage of the texture ID used for each ball
 };

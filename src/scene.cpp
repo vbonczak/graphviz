@@ -19,6 +19,9 @@ void scene_structure::initialize()
 	timer.event_period = 0.1f;
 	timer.scale = 0.05f;
 
+	theta = -pi;
+
+	cue_white_dist = 0;
 
 	alpha = 0.98f;
 	beta = 0.05f;
@@ -162,7 +165,7 @@ void scene_structure::queue_init()
 	// We want ctrl_pos to be between queue_length and 2*queue_length away from the white ball, and the cue length to be constant
 	vec3 white_pos = boules[0].p;
 	float r = boules[0].r;
-	ctrl_pos[1] = white_pos[1];
+	/*ctrl_pos[1] = white_pos[1];
 	float const dist = norm(ctrl_pos - white_pos);
 	if (dist < queue_length)
 	{
@@ -171,8 +174,9 @@ void scene_structure::queue_init()
 	if (dist > 2 * queue_length)
 	{
 		ctrl_pos = white_pos + 2 * queue_length * ((ctrl_pos - white_pos) / dist);
-	}
-	vec3 end_pos = ctrl_pos + queue_length * (white_pos - ctrl_pos) / norm(white_pos - ctrl_pos);
+	}*/
+	ctrl_pos = { white_pos[0] + sin(theta) * (cue_white_dist+r+queue_length),0,white_pos[2] + cos(theta) * (cue_white_dist+r+queue_length) };
+	vec3 end_pos = { white_pos[0] + sin(theta) * (cue_white_dist+r),0,white_pos[2] + cos(theta) * (cue_white_dist +r)};
 	queue.initialize(mesh_primitive_cylinder(queue_radius, ctrl_pos, end_pos), "queue");
 	queue.shading.color = { 0x63 / 255.f,0,0 };
 }
@@ -294,12 +298,13 @@ void scene_structure::add_balls()
 
 void scene_structure::display_gui()
 {
-	ImGui::Checkbox("Frame", &gui.display_frame);
-	ImGui::SliderFloat("Time scale", &timer.scale, 0.05f, 2.0f, "%.2f s");
-	ImGui::SliderFloat("Time to add new sphere", &timer.event_period, 0.05f, 2.0f, "%.2f s");
+	//ImGui::Checkbox("Frame", &gui.display_frame);
+	//ImGui::SliderFloat("Time scale", &timer.scale, 0.05f, 2.0f, "%.2f s");
+	//ImGui::SliderFloat("Time to add new sphere", &timer.event_period, 0.05f, 2.0f, "%.2f s");
 	//ImGui::SliderFloat("Friction", &alpha, 0.05f, 1.0f, "%.2f");
 	ImGui::SliderFloat("Impact", &beta, 0.05f, 1.0f, "%.2f");
-
+	ImGui::SliderFloat("Cue angle", &theta, -pi, pi, "%.2f");
+	ImGui::SliderFloat("Cue force", &cue_white_dist, 0, queue_length, "%.2f");
 	//ImGui::SliderFloat("Static friction", &mu, 0.05f, 1.0f, "%.2f");
 	//ImGui::SliderFloat("Vepsilon", &vepsilon, 0.01f, 10.0f, "%.2f");  
 }

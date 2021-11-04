@@ -107,11 +107,21 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 		// Droite souris->tout droit
 		vec3 pos, dir, intersct;
 		droite_souris(scene, cursor, pos, dir);
+		// Variables necessary in switch case 1:
+		float r, mindist, maxdist;
+		vec3 cue_dir;
 		switch (scene.cur_control)
 		{
 		case 1:
 			intersection_plan(intersct, pos, dir, n, scene.ctrl_pos);
 			scene.ctrl_pos = intersct;
+			r = scene.boules[0].r;
+			scene.ctrl_pos[1] = 0;
+			cue_dir = scene.ctrl_pos - scene.boules[0].p;
+			scene.theta = (cue_dir[0] >= 0 ? 1 : -1) * acos(cue_dir[2] / norm(cue_dir));
+			mindist = scene.queue_length + r;
+			maxdist = 2 * scene.queue_length + r;
+			scene.cue_white_dist = norm(cue_dir) < mindist ? 0 : (norm(cue_dir) > maxdist ? scene.queue_length : norm(cue_dir)-scene.queue_length-r);
 			scene.refresh_control_positions();
 			break;
 			break;
@@ -162,6 +172,8 @@ void mouse_click_callback(GLFWwindow* window, int button, int action, int /*mods
 			scene.cur_control = -1;
 
 	}
+	else
+		scene.cur_control = -1;
 }
 
 // This function is called everytime a keyboard touch is pressed/released
