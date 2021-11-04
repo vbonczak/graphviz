@@ -2,7 +2,7 @@
 
 #include "cgp/cgp.hpp"
 
-extern float alpha, beta, mu, vepsilon;
+extern float alpha, beta, beta_feutre, mu, vepsilon;
 
 //Dimensions du plateau
 extern float H;
@@ -17,8 +17,12 @@ struct boule_structure
     cgp::vec3 c; // Color
     float r;     // Radius
     float m;     // mass
-    GLint text; //texture
+    //GLint text; //texture
+
+    bool in_play;
 };
 
 void simulate(std::vector<boule_structure>& boules, float dt);
+
+bool over_hole(boule_structure& boule);
 

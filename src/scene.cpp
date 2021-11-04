@@ -24,8 +24,9 @@ void scene_structure::initialize()
 	cue_white_dist = 0;
 
 	alpha = 0.98f;
-	beta = 0.05f;
-	mu = 0.92f;
+	beta = 0.95f;
+	beta_feutre = 0.1f;
+	mu = 0.99f;
 	vepsilon = 0.30f;
 
 }
@@ -49,6 +50,26 @@ void scene_structure::init_objects()
 	bord3.initialize(bord_mesh, "bord3");
 	bord4.initialize(bord_mesh, "bord4");
 	bord4.transform.translation = { H, 0, 0 };
+
+	mesh hole = mesh_primitive_disc(0.06f, { -H / 2,0.001f,-L / 2 }, { 0,1,0 });
+	hole1.initialize(hole, "hole1");
+	hole2.initialize(hole, "hole2");
+	hole3.initialize(hole, "hole3");
+	hole4.initialize(hole, "hole4");
+	hole5.initialize(hole, "hole5");
+	hole6.initialize(hole, "hole6");
+	hole2.transform.translation = { 0,0,L / 2 };
+	hole3.transform.translation = { 0,0,L };
+	hole4.transform.translation = { H,0,0 };
+	hole5.transform.translation = { H,0,L / 2 };
+	hole6.transform.translation = { H,0,L };
+
+	hole1.shading.color = { 0,0,0 };
+	hole2.shading.color = { 0,0,0 };
+	hole3.shading.color = { 0,0,0 };
+	hole4.shading.color = { 0,0,0 };
+	hole5.shading.color = { 0,0,0 };
+	hole6.shading.color = { 0,0,0 };
 
 	texture_bois = opengl_load_texture_image("assets/bois.jpg");
 	bord4.texture = bord3.texture = bord2.texture = bord1.texture = texture_bois;
@@ -106,8 +127,19 @@ void scene_structure::display()
 	draw(bord3, environment);
 	draw(bord4, environment);
 
+	draw(hole1, environment);
+	draw(hole2, environment);
+	draw(hole3, environment);
+	draw(hole4, environment);
+	draw(hole5, environment);
+	draw(hole6, environment);
+
 	// Call the simulation of the particle system
-	float const dt = 0.01f * timer.scale;
+	float const dt = 0.1f * timer.scale;
+	if (ImGui::Button("Shoot!"))
+	{
+		shoot_ball();
+	}
 	simulate(boules, dt);
 
 	// Display the result
@@ -165,18 +197,8 @@ void scene_structure::queue_init()
 	// We want ctrl_pos to be between queue_length and 2*queue_length away from the white ball, and the cue length to be constant
 	vec3 white_pos = boules[0].p;
 	float r = boules[0].r;
-	/*ctrl_pos[1] = white_pos[1];
-	float const dist = norm(ctrl_pos - white_pos);
-	if (dist < queue_length)
-	{
-		ctrl_pos = white_pos + (queue_length + r) * ((ctrl_pos - white_pos) / dist);
-	}
-	if (dist > 2 * queue_length)
-	{
-		ctrl_pos = white_pos + 2 * queue_length * ((ctrl_pos - white_pos) / dist);
-	}*/
-	ctrl_pos = { white_pos[0] + sin(theta) * (cue_white_dist+r+queue_length),0,white_pos[2] + cos(theta) * (cue_white_dist+r+queue_length) };
-	vec3 end_pos = { white_pos[0] + sin(theta) * (cue_white_dist+r),0,white_pos[2] + cos(theta) * (cue_white_dist +r)};
+	ctrl_pos = { white_pos[0] + sin(theta) * (cue_white_dist + r + queue_length),white_pos[1],white_pos[2] + cos(theta) * (cue_white_dist + r + queue_length) };
+	vec3 end_pos = { white_pos[0] + sin(theta) * (cue_white_dist + r),white_pos[1],white_pos[2] + cos(theta) * (cue_white_dist + r) };
 	queue.initialize(mesh_primitive_cylinder(queue_radius, ctrl_pos, end_pos), "queue");
 	queue.shading.color = { 0x63 / 255.f,0,0 };
 }
@@ -187,16 +209,9 @@ void scene_structure::queue_reinit()
 	queue_init();
 }
 
-/*void scene_structure::update_queue_pos()
+void scene_structure::shoot_ball()
 {
-	ctrl_pos = ctrl_pos/ norm(ctrl_pos);
-	ctrl_pos = queue_length * ctrl_pos;
-}*/
-
-void scene_structure::launch_ball()
-{
-	//Lancement de la boule, sa vitesse devient >0
-
+	boules[0].v = { -sin(theta) * cue_white_dist * 20,0,-cos(theta) * cue_white_dist * 20 };
 	//ensuite on place ce paramètre pour replacer correctement la queue quand la boule s'immobilisera
 	queue_waiting = true;
 }
@@ -258,14 +273,15 @@ void scene_structure::add_balls()
 		boules.push_back(particle);
 	}*/
 
-	float initial_height = 10;
+	float initial_height = 0.1f;
 
 	boule_structure boule;
 	boule.r = 0.03f;//6cm de diamètre
 	boule.p = { 0, boule.r + initial_height, -L / 4 };
 	boule.c = { 1,1,1 };
 	boule.v = { 0,-0.2,0 };
-	boule.m = 200.0f; //200g
+	boule.m = 0.2f; //200g
+	boule.in_play = true;
 
 	boules.push_back(boule);
 
@@ -302,7 +318,7 @@ void scene_structure::display_gui()
 	//ImGui::SliderFloat("Time scale", &timer.scale, 0.05f, 2.0f, "%.2f s");
 	//ImGui::SliderFloat("Time to add new sphere", &timer.event_period, 0.05f, 2.0f, "%.2f s");
 	//ImGui::SliderFloat("Friction", &alpha, 0.05f, 1.0f, "%.2f");
-	ImGui::SliderFloat("Impact", &beta, 0.05f, 1.0f, "%.2f");
+	//ImGui::SliderFloat("Impact", &beta, 0.05f, 1.0f, "%.2f");
 	ImGui::SliderFloat("Cue angle", &theta, -pi, pi, "%.2f");
 	ImGui::SliderFloat("Cue force", &cue_white_dist, 0, queue_length, "%.2f");
 	//ImGui::SliderFloat("Static friction", &mu, 0.05f, 1.0f, "%.2f");

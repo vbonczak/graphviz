@@ -159,7 +159,7 @@ void mouse_click_callback(GLFWwindow* window, int button, int action, int /*mods
 		float distance_min = 0.1f;
 
 		vec3 intersect;
-		if (intersection_droite(intersect, pos, dir, scene.ctrl_pos, scene.control_radius)) //controle
+		if (intersection_droite(intersect, pos, dir, scene.ctrl_pos, scene.control_radius*3)) //controle
 		{
 			const float distance = norm(intersect - pos);
 			if (scene.cur_control == -1 || distance < distance_min)
@@ -180,6 +180,11 @@ void mouse_click_callback(GLFWwindow* window, int button, int action, int /*mods
 void keyboard_callback(GLFWwindow* /*window*/, int key, int, int action, int /*mods*/)
 {
 	inputs.keyboard.update_from_glfw_key(key, action);
+
+	if (key == 32)
+	{
+		scene.shoot_ball();
+	}
 }
 
 // Standard initialization procedure

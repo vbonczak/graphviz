@@ -58,6 +58,13 @@ struct scene_structure {
 	mesh_drawable bord3;
 	mesh_drawable bord4;
 
+	mesh_drawable hole1;
+	mesh_drawable hole2;
+	mesh_drawable hole3;
+	mesh_drawable hole4;
+	mesh_drawable hole5;
+	mesh_drawable hole6;
+
 	// ****************************** //
 	// Elements and shapes of the scene
 	// ****************************** //
@@ -83,6 +90,6 @@ struct scene_structure {
 	void refresh_control_positions();
 	void queue_init();
 	void queue_reinit();
-	void launch_ball();
+	void shoot_ball();
 	//vector<GLuint> balls_textures;             // Storage of the texture ID used for each ball
 };
