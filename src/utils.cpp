@@ -3,6 +3,14 @@
 //Fonctions issues de la bibliothèque VCL de Damien Rohmer https://github.com/drohmer/inf443-vcl
 //Adaptées pour les besoins du programme.
 
+/// <summary>
+/// Retourne la droite curseur - fond de la scène de la caméra actuelle
+/// via les paramètres par référence pos et direction
+/// </summary>
+/// <param name="scene"></param>
+/// <param name="cursor"></param>
+/// <param name="pos"></param>
+/// <param name="direction"></param>
 void droite_souris(const scene_structure& scene, const vec2& cursor, vec3& pos, vec3& direction)
 {
 	pos = scene.environment.camera.position();
@@ -17,8 +25,16 @@ void droite_souris(const scene_structure& scene, const vec2& cursor, vec3& pos, 
 	direction = normalize(vec3(dir[0], dir[1], dir[2]));
 }
 
-
-
+/// <summary>
+/// Retourne true si le droite coupe la sphère.
+/// intersect est le point d'intersection
+/// </summary>
+/// <param name="intersect"></param>
+/// <param name="droite_position"></param>
+/// <param name="droite_direction"></param>
+/// <param name="center"></param>
+/// <param name="radius"></param>
+/// <returns></returns>
 bool intersection_droite(vec3& intersect, const vec3& droite_position, const vec3& droite_direction, const vec3& center, float radius)
 {
 	const vec3 d = droite_position - center;
@@ -35,7 +51,6 @@ bool intersection_droite(vec3& intersect, const vec3& droite_position, const vec
 
 		if (t > 0) {
 			intersect = droite_position + t * droite_direction;
-			//pick.normal = normalize(pick.intersection - center);
 			return true;
 		}
 	}

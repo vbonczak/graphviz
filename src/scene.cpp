@@ -57,8 +57,6 @@ void scene_structure::init_objects()
 	plane.transform.translation = { -H / 2,0,-L / 2 };
 	control_radius = 0.06f;
 
-
-
 	//Contrôles
 	control_sphere.initialize(mesh_primitive_sphere(control_radius), "ctrl");
 	control_sphere.shading.color = { 1,0,0 };
@@ -90,12 +88,6 @@ void scene_structure::display()
 
 	timer.update();
 	environment.light = environment.camera.position();
-
-	// Other elements of the scene
-	// ***************************************** //
-
-	// Basics common elements
-	// ***************************************** //
 
 	if (gui.display_wireframe)
 	{
