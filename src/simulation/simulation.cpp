@@ -113,9 +113,7 @@ bool over_hole(boule_structure& boule)
 		if (norm(boule.p - holes[j]) < 2 * boule.r)
 		{
 			boule.in_play = false;
-#ifndef TROIS_DIMENSION
 			boule.v = { 0,0,0 };
-#endif
 			return true;
 		}
 	}
@@ -139,7 +137,7 @@ void simulate3d(std::vector<boule_structure>& boules, float dt)
 	{
 		boule_structure& boule = boules[k];
 		//Collision avec les faces du cube
-		if (boule.in_play && !over_hole(boule))
+		if (boule.in_play && !over_hole3d(boule))
 		{
 			for (size_t j = 0; j < planesA.size(); j++)
 			{
@@ -191,4 +189,17 @@ void simulate3d(std::vector<boule_structure>& boules, float dt)
 			}
 		}
 	}
+}
+
+bool over_hole3d(boule_structure& boule)
+{
+	for (size_t j = 0; j < holes.size(); j++)
+	{
+		if (norm(boule.p - holes[j]) < 3 * boule.r)
+		{
+			boule.in_play = false;
+			return true;
+		}
+	}
+	return false;
 }
