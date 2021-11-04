@@ -159,11 +159,21 @@ void scene_structure::refresh_control_positions()
 
 void scene_structure::queue_init()
 {
+	// We want ctrl_pos to be between queue_length and 2*queue_length away from the white ball, and the cue length to be constant
 	vec3 white_pos = boules[0].p;
-	//std::cout << white_pos << "   " << ctrl_pos << endl;
+	float r = boules[0].r;
 	ctrl_pos[1] = white_pos[1];
-	ctrl_pos = white_pos + queue_length * ((ctrl_pos - white_pos) / norm(ctrl_pos - white_pos));
-	queue.initialize(mesh_primitive_cylinder(queue_radius, ctrl_pos, boules[0].p), "queue");
+	float const dist = norm(ctrl_pos - white_pos);
+	if (dist < queue_length)
+	{
+		ctrl_pos = white_pos + (queue_length + r) * ((ctrl_pos - white_pos) / dist);
+	}
+	if (dist > 2 * queue_length)
+	{
+		ctrl_pos = white_pos + 2 * queue_length * ((ctrl_pos - white_pos) / dist);
+	}
+	vec3 end_pos = ctrl_pos + queue_length * (white_pos - ctrl_pos) / norm(white_pos - ctrl_pos);
+	queue.initialize(mesh_primitive_cylinder(queue_radius, ctrl_pos, end_pos), "queue");
 	queue.shading.color = { 0x63 / 255.f,0,0 };
 }
 
