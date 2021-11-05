@@ -19,7 +19,7 @@ struct boule_structure
     float m;     // mass
     //GLint text; //texture
 
-    bool in_play;
+    bool in_play; //Si la boule est toujours en jeu
 };
 
 void simulate(std::vector<boule_structure>& boules, float dt);

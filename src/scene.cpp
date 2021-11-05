@@ -32,6 +32,7 @@ void scene_structure::initialize()
 
 }
 
+
 void scene_structure::init_objects()
 {
 
@@ -177,7 +178,7 @@ void scene_structure::sphere_display()
 	for (size_t k = 0; k < N; ++k)
 	{
 		boule_structure const& boule = boules[k];
-		//sphere.texture = particle.text;
+		//sphere.texture = particle.text; Future use : textures !
 		sphere.transform.translation = boule.p;
 		sphere.transform.scaling = boule.r;
 		sphere.shading.color = boule.c;

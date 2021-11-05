@@ -33,17 +33,25 @@ struct scene_structure {
 	mesh_drawable sphere;
 	skybox_drawable skybox;
 
+	//-1 if no currrent control point selected, index of the point otherwise (allows to have more if necessary)
 	int cur_control;
 
+	//The current 3D position of the control sphere
 	vec3 ctrl_pos;
+	//Radius of the control sphere
 	float control_radius;
+	//The control sphere
 	mesh_drawable control_sphere;
-
+	//Rayon de la queue
 	float queue_radius;
+	//Angles
 	float theta;
 	float phi;
+	//Distance à la boule blanche
 	float cue_white_dist;
+	//Longueur de la queue
 	float queue_length;
+	//permet de faire disparaître la queue lors du tir
 	bool queue_waiting;
 	mesh_drawable queue;
 
@@ -86,5 +94,5 @@ struct scene_structure {
 	void queue_init();
 	void queue_reinit();
 	void shoot_ball();
-	//vector<GLuint> balls_textures;             // Storage of the texture ID used for each ball
+	//vector<GLuint> balls_textures;          // Storage of the texture ID used for each ball (future use)
 };

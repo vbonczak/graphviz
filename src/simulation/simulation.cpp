@@ -30,6 +30,7 @@ void simulate(std::vector<boule_structure>& boules, float dt)
 {
 	vec3 const g = { 0,-9.81f,0 };
 	size_t const N = boules.size();
+	//Mouvement des boules
 	for (size_t k = 0; k < N; ++k)
 	{
 		boule_structure& boule = boules[k];
@@ -123,6 +124,7 @@ bool over_hole(boule_structure& boule)
 
 void simulate3d(std::vector<boule_structure>& boules, float dt)
 {
+	//Mouvement des boules
 	size_t const N = boules.size();
 	for (size_t k = 0; k < N; ++k)
 	{
@@ -136,9 +138,10 @@ void simulate3d(std::vector<boule_structure>& boules, float dt)
 	for (size_t k = 0; k < N; ++k)
 	{
 		boule_structure& boule = boules[k];
-		//Collision avec les faces du cube
+		//Seulement si la boule est toujours en jeu
 		if (boule.in_play && !over_hole3d(boule))
 		{
+			//Collision avec les plans
 			for (size_t j = 0; j < planesA.size(); j++)
 			{
 				float d = dot(boule.p - planesA[j], normals[j]);
@@ -156,7 +159,6 @@ void simulate3d(std::vector<boule_structure>& boules, float dt)
 			//Collision entre sphères
 			for (size_t i = 0; i < k; i++)
 			{
-
 				boule_structure& boule2 = boules[i];
 				float dist = norm(boule.p - boule2.p);
 				if (dist <= boule2.r + boule.r)
@@ -181,9 +183,6 @@ void simulate3d(std::vector<boule_structure>& boules, float dt)
 					float d = boule.r + boule2.r - dist;
 					boule.p += (d / 2) * u;
 					boule2.p -= (d / 2) * u;
-
-					//Formule avec m1=m2
-
 				}
 
 			}
@@ -193,6 +192,7 @@ void simulate3d(std::vector<boule_structure>& boules, float dt)
 
 bool over_hole3d(boule_structure& boule)
 {
+	//Pour la version 3D, les trous sont plus permissifs.
 	for (size_t j = 0; j < holes.size(); j++)
 	{
 		if (norm(boule.p - holes[j]) < 3 * boule.r)
