@@ -6,13 +6,13 @@ Année 2021-2022
 
 ### Compiler
 Avec CMake. 
-####Pour Windows avec Visual Studio
+#### Pour Windows avec Visual Studio
 - Changer le répertoire de sortie (rubrique Général) pour qu'il soit dans le dossier racine 
 (retirer les deux derniers composants du chemin par défaut).
 - Changer dans la rubrique Débogage le répertoire de travail en ```$(TargetDir)```.
 - Déboguer avec la configuration RelWithDebInfo.
 
-###Structure du code
+### Structure du code
 La documentation est à la fois en anglais et en français pour le moment.
 
 La branche Refactor est un essai d'utilisation de l'héritage dans nos structures, 
